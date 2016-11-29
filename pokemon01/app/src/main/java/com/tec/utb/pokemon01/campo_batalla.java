@@ -1,10 +1,14 @@
 package com.tec.utb.pokemon01;
 
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -23,6 +27,13 @@ public class campo_batalla extends AppCompatActivity {
     TextView pokemon2_nombre;
     ImageView pokemon1_imagen;
     ImageView pokemon2_imagen;
+    TextView vida1;
+    TextView vida2;
+    Button ataque;
+    int jugador1_vida=100;
+    int maquina_vida=100;
+    String nombre1;
+    String nombre2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,16 +42,65 @@ public class campo_batalla extends AppCompatActivity {
         pokemon2_nombre= (TextView) findViewById(R.id.pokemon_2_nombre);
         pokemon1_imagen= (ImageView) findViewById(R.id.pokemon_1_imagen);
         pokemon2_imagen= (ImageView) findViewById(R.id.pokemon_2_imagen);
+        ataque= (Button) findViewById(R.id.button2);
+        vida1= (TextView) findViewById(R.id.pokemon_1_vida);
+        vida2= (TextView) findViewById(R.id.pokemon_2_vida);
 
+        vida1.setText("100");
+        vida2.setText("100");
 
         Random random=new Random();
         int id1= (int) (Math.random()*500);
         int id2=(int) (Math.random()*500);
         traernombre(id1,pokemon1_nombre);
         traernombre(id2,pokemon2_nombre);
+        cargarimagen(id2,pokemon1_imagen);
+        cargarimagen2(id1,pokemon2_imagen);
+        ataque.setEnabled(false);
+        ataque.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ataque();
+            }
+        });
 
-        cargarimagen(id1,pokemon1_imagen);
-        cargarimagen2(id2,pokemon2_imagen);
+    }
+
+    public boolean verificar(int vida){
+        if (vida<=0){
+            return true;
+        }
+        else return false;
+    }
+    public void ataque(){
+        ataque.setEnabled(false);
+        int ataque_jugador= (int) (Math.random()*50);
+        final int ataque_maquina= (int) (Math.random()*50);
+        //
+        maquina_vida=(maquina_vida-ataque_jugador);
+        if (verificar(maquina_vida)==true){
+            vida2.setText("0");
+            ataque.setEnabled(false);
+            Toast.makeText(campo_batalla.this, "GANASTES", Toast.LENGTH_SHORT).show();
+
+        }else {
+            vida2.setText(""+maquina_vida);
+                   jugador1_vida=(jugador1_vida-ataque_maquina);
+                    if (verificar(jugador1_vida)==true){
+                        vida1.setText("0");
+                        ataque.setEnabled(false);
+                        Toast.makeText(campo_batalla.this, "PERDISTES", Toast.LENGTH_SHORT).show();
+
+                    }else {
+                        vida1.setText(""+jugador1_vida);
+                        ataque.setEnabled(true);
+                    }
+
+
+
+
+        }
+
 
 
     }
@@ -48,12 +108,11 @@ public class campo_batalla extends AppCompatActivity {
     public void descargarimagen(ImageView imageView,String url){
         ImageLoader mImageLoader;
 // The URL for the image that is being loaded.
-
-
 // Get the ImageLoader through your singleton class.
         mImageLoader = MySingleton.getInstance(this).getImageLoader();
         mImageLoader.get(url, ImageLoader.getImageListener(imageView,
                 R.mipmap.ic_launcher, R.mipmap.ic_launcher));
+        ataque.setEnabled(true);
 
     }
 
@@ -130,7 +189,6 @@ public class campo_batalla extends AppCompatActivity {
 
 // ...
         String url ="http://pokeapi.co/api/v2/pokemon/"+id+"/";
-
 // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
